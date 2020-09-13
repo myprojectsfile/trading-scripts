@@ -1,0 +1,28 @@
+//@version=4
+strategy("My MACD Strategy", overlay=true)
+fastLength = input(12)
+slowlength = input(26)
+MACDLength = input(9)
+fastMaLength = input(50)
+slowMaLength = input(100)
+emaLength= input (7)
+fastMa = sma(close,fastMaLength)
+slowMa = sma(close,slowMaLength)
+emaValue=ema(close,emaLength)
+MACD = ema(close, fastLength) - ema(close, slowlength)
+aMACD = ema(MACD, MACDLength)
+delta = MACD - aMACD
+smaDelta= fastMa - slowMa
+
+// Calculate Ichimoku
+conversionPeriods = input(9, minval=1, title="Conversion Line Periods")
+basePeriods = input(26, minval=1, title="Base Line Periods")
+donchian(len) => avg(lowest(len), highest(len))
+conversionLine = donchian(conversionPeriods)
+baseLine = donchian(basePeriods)
+
+if (crossover(delta,0) and emaValue<fastMa and fastMa<slowMa and conversionLine<=baseLine)
+	strategy.entry("MacdLE", strategy.long, comment="Buy"+tostring(highest(MACD,20)))
+if (crossunder(delta,0) and emaValue>fastMa and fastMa>slowMa and conversionLine>=baseLine)
+	strategy.entry("MacdSE", strategy.short, comment="Sell"+tostring(highest(MACD,20)))
+//plot(strategy.equity, title="equity", color=color.red, linewidth=2, style=plot.style_areabr)
